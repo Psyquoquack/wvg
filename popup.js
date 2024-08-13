@@ -3,6 +3,8 @@ let requests=chrome.extension.getBackgroundPage().requests;
 let pageURL=chrome.extension.getBackgroundPage().pageURL;
 let targetIds=chrome.extension.getBackgroundPage().targetIds;
 let clearkey=chrome.extension.getBackgroundPage().clearkey;
+let mpdFiles=chrome.extension.getBackgroundPage().mpdFiles;
+let BaseUrlVid=chrome.extension.getBackgroundPage().BaseUrl;
 
 async function guess(){
     //Be patient!
@@ -24,7 +26,22 @@ async function guess(){
 
     //Get result
     let result = await pyodide.runPythonAsync([pre, scheme, after].join("\n"));
-    document.getElementById('result').value=result;
+    try {
+        let BaseUrl = BaseUrlVid[0].substring(0, mpdFiles[0].lastIndexOf('/') + 1);
+        const lines = result.split('\n');
+        const keys = [];
+    
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].trim() !== "") {
+                keys.push("--key " + lines[i].trim());
+            }
+        }
+    
+        let sresult = "N_m3u8DL-RE " + keys.join(" ") + " --base-url " + BaseUrl + " " + mpdFiles[0] + " -M mkv";
+        document.getElementById('result').value = sresult;
+    } catch (error) {
+        document.getElementById('result').value = result;
+    }
 
     //Save history
     let historyData={
