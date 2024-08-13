@@ -1,4 +1,4 @@
-## WVGuesserExtension-NextGen
+## WVGuesserExtension-NextGen (FORKED FROM [FoxRefire](https://github.com/FoxRefire))
 
 #### For more details, see [docs](https://github.com/FoxRefire/wvg/wiki)
 ### Features of fork
