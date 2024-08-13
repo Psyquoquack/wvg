@@ -5,6 +5,8 @@ window.bodys=[];
 window.targetIds=[];
 window.pageURL="";
 window.clearkey="";
+window.mpdFiles = [];
+window.BaseUrl = [];
 
 chrome.storage.local.get("isBlock", (value) => {
     window.isBlock = value.isBlock;
@@ -50,6 +52,29 @@ chrome.webRequest.onBeforeRequest.addListener(
     },
     {urls: ["<all_urls>"]},
     ["requestBody"]
+);
+
+//Get requestBody from POST requests
+chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+      if (details.url.endsWith('.mpd')) {
+        window.mpdFiles.push(details.url);
+      }
+    },
+    { urls: ["<all_urls>"] }, ["requestBody"]
+  );
+
+chrome.webRequest.onBeforeRequest.addListener(
+  function(details) {
+    const videoExtensions = ['.mp4', '.m4s', '.webm', '.ogg', '.mkv', '.avi', '.mov', '.flv'];
+    const url = details.url.toLowerCase();
+
+    if (videoExtensions.some(ext => url.endsWith(ext))) {
+      window.BaseUrl.push(details.url);
+    }
+  },
+  { urls: ["<all_urls>"] },
+  ["requestBody"]
 );
 
 //Receive PSSH from content.js
