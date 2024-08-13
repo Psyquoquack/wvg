@@ -1,6 +1,8 @@
 ## WVGuesserExtension-NextGen
 
 #### For more details, see [docs](https://github.com/FoxRefire/wvg/wiki)
+### Features of fork
+* Automatic N_m3u8DL-RE args
 
 ### Installation
 
