@@ -5,8 +5,8 @@ window.bodys=[];
 window.targetIds=[];
 window.pageURL="";
 window.clearkey="";
-window.mpdFiles = [];
-window.BaseUrl = [];
+window.mpdFiles = "";
+window.BaseUrl = "";
 
 chrome.storage.local.get("isBlock", (value) => {
     window.isBlock = value.isBlock;
@@ -58,7 +58,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
       if (details.url.endsWith('.mpd')) {
-        window.mpdFiles.push(details.url);
+        window.mpdFiles = details.url;
       }
     },
     { urls: ["<all_urls>"] }, ["requestBody"]
@@ -70,7 +70,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     const url = details.url.toLowerCase();
 
     if (videoExtensions.some(ext => url.endsWith(ext))) {
-      window.BaseUrl.push(details.url);
+      window.BaseUrl = details.url;
     }
   },
   { urls: ["<all_urls>"] },

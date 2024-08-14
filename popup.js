@@ -6,10 +6,32 @@ let clearkey=chrome.extension.getBackgroundPage().clearkey;
 let mpdFiles=chrome.extension.getBackgroundPage().mpdFiles;
 let BaseUrlVid=chrome.extension.getBackgroundPage().BaseUrl;
 
+async function checkStringInMpd(url, searchString) {
+    try {
+        // Fetch the .mpd file
+        const response = await fetch(url);
+
+        // Check if the response is OK (status code 200-299)
+        if (!response.ok) {
+            throw new Error(`Failed to fetch the .mpd file: ${response.statusText}`);
+        }
+
+        // Convert the response to text
+        const mpdText = await response.text();
+        // Check if the searchString is in the .mpd file
+        const stringExists = mpdText.includes(searchString);
+        return stringExists;
+    } catch (error) {
+        return false;
+    }
+}
 async function guess(){
     //Be patient!
     document.body.style.cursor = "wait";
     document.getElementById("guess").disabled=true
+
+    const BaseURlCheckHTTP = await checkStringInMpd(mpdFiles, "<BaseURL>http");
+    const BaseURlCheck = await checkStringInMpd(mpdFiles, "<BaseURL>");
 
     //Init Pyodide
     let pyodide = await loadPyodide();
@@ -27,7 +49,7 @@ async function guess(){
     //Get result
     let result = await pyodide.runPythonAsync([pre, scheme, after].join("\n"));
     try {
-        let BaseUrl = BaseUrlVid[0].substring(0, mpdFiles[0].lastIndexOf('/') + 1);
+        let BaseUrl = BaseUrlVid.substring(0, mpdFiles.lastIndexOf('/') + 1);
         const lines = result.split('\n');
         const keys = [];
     
@@ -36,10 +58,19 @@ async function guess(){
                 keys.push("--key " + lines[i].trim());
             }
         }
+        let sresult;
+        if (BaseURlCheck) {
+            if (BaseURlCheckHTTP) {
+                document.getElementById('result').value = `N_m3u8DL-RE ${keys.join(" ")} ${mpdFiles} -M mkv`;
+            } else {
+                document.getElementById('result').value = `N_m3u8DL-RE ${keys.join(" ")} --base-url ${BaseUrl} ${mpdFiles} -M mkv`;
+            }
+        } else {
+            document.getElementById('result').value = `N_m3u8DL-RE ${keys.join(" ")} ${mpdFiles} -M mkv`;
+        }
     
-        let sresult = "N_m3u8DL-RE " + keys.join(" ") + " --base-url " + BaseUrl + " " + mpdFiles[0] + " -M mkv";
-        document.getElementById('result').value = sresult;
     } catch (error) {
+        console.log(error);
         document.getElementById('result').value = result;
     }
 
